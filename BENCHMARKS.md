@@ -488,7 +488,7 @@ Migtissera's Qwen3.5-based dense 27B instruct/agentic fine-tune (`migtissera/Tes
 
 ## ThinkingCap-Qwen3.6-27B
 
-LeaderboardModel1's ThinkingCap — a **Qwen3.6-27B (qwen3_5) VL reasoning fine-tune**, AutoRound W4A16, served **W4A8** (int8 activations via `VLLM_MARLIN_INPUT_DTYPE=int8` + the shared `qwen-w4a8-int8-act` patches). Same `qwen35-dense` hybrid (48 linear + 16 full-attn, 64 total) + **working built-in MTP head** as Tess (`mtp.fc`@BF16). Vision-capable base, shipped **text-only**.
+bottlecapai's ThinkingCap — a **Qwen3.6-27B (qwen3_5) VL reasoning fine-tune**, AutoRound W4A16 (quantized by LeaderboardModel1), served **W4A8** (int8 activations via `VLLM_MARLIN_INPUT_DTYPE=int8` + the shared `qwen-w4a8-int8-act` patches). Same `qwen35-dense` hybrid (48 linear + 16 full-attn, 64 total) + **working built-in MTP head** as Tess (`mtp.fc`@BF16). Vision-capable base, shipped **text-only**.
 
 ### Dual-card (2× RTX 3090) — vLLM
 
@@ -499,6 +499,26 @@ LeaderboardModel1's ThinkingCap — a **Qwen3.6-27B (qwen3_5) VL reasoning fine-
 | `w4a8.yml` (W4A8, **MTP n=3**) | @paulp83 (2× **RTX 5090** PCIe 5.0 **x8**, sm_120, Ryzen 9 9950X3D, B850 AI TOP, driver 610.43.03, **no power cap**, no NVLink) | fp8_e4m3 | 262144 | **164.9 / 210.5** (decode **165.9 / 213.9**, n=5, CV 4.2% / 1.3%) | 6,205 @10K / 4,697 @90K | 28,669 / 28,413 MiB per card | 2026-08-02 | **First Blackwell run of the W4A8 slug** ([#833](https://github.com/noonghunna/club-3090/issues/833)), on the post-[#831](https://github.com/noonghunna/club-3090/pull/831) **`SPEC_N=3`** default (his boot log confirms `num_speculative_tokens: 3`). TTFT 37/39 ms, util 0.85, `max_num_seqs=8`, prefix caching ON. verify-stress ladder to 240K with free VRAM 1,519 → 1,442 MB; soak-continuous **PASS**. **~2.25× / ~2.0× the 2× 3090 reference** (73.3 / 106.1). 8-pack **121/150 think-off · 127/150 think-on** (v0.9.8), pass@3 123 / 134 — the highest 8-pack recorded on this slug. ⚠️ Narrative CV 4.2% is well above his other runs on this rig (0.1–0.4%); treat the narrative figure as the softer of the two. ⚠️ **The vllm#50021 MTP exposure applies to this row's config** — n=3 lowers the fault rate but does not close it (this reporter crashed at n=3 on the NVFP4 sibling, [#838](https://github.com/noonghunna/club-3090/issues/838)); `SPEC_N=0` remains the reliability setting. Numbers taken from his third and final attachment (no power cap); two earlier power-capped runs on the same thread are superseded and not banked. |
 
 **Bonus — concurrency N-sweep (agg tok/s, no-MTP):** N=1 65.7 · N=2 113.3 · N=4 212.9 · N=8 **390.9** (5.95× to N=8 — W4A8 int8-GEMM scales unusually well at batch for a dense 27B).
+
+---
+
+## ThinkingCap-Qwen3.8-27B
+
+bottlecapai's **reasoning fine-tune of Qwen3.8-27B** (released 2026-09-23; identical `text_config` to Qwen3.8-27B).
+Served on our own **AutoRound INT4** ([wasifb/ThinkingCap-Qwen3.8-27B-AutoRound-W4A16](https://huggingface.co/wasifb/ThinkingCap-Qwen3.8-27B-AutoRound-W4A16),
+Frozenlock-layout twin) and bottlecap's FP8, as replicas of the Qwen3.8 slugs. ⚠️ PolyForm Small Business license.
+Each ThinkingCap arm sits next to a Frozenlock (base Qwen3.8) reference taken on the same rig, power cap and image that day.
+
+### Dual-card (2× RTX 3090) — vLLM v0.30.0
+
+| Compose | Rig | KV | Max ctx | Narr / Code TPS | PP tok/s | Peak VRAM | Date | Notes |
+| --- | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `dual/autoround-int4/mtp.yml` (`vllm/thinkingcap38-27b-dual-fast`, MTP n=4, W4A8) | @noonghunna (2× 3090 PCIe, **230 W**) | fp8_e4m3 | 262144 | **74.0 / 101.0** | 1720 @10K / 1246 @90K | — | 2026-09-23 | 🧪 Experimental. verify-full PASS; MTP accept 3.6–5.0; a 20K-token forced generation held accept 2.7–4.0 (no #1052-class collapse). Frozenlock same day: 75.5 / 106.5, 1710 / 1266. |
+| `dual/autoround-int4/dflash2-fp8.yml` (`vllm/thinkingcap38-27b-dual-superfast`, DFlash2 n=7) | @noonghunna (2× 3090 PCIe, **230 W**) | fp8_e4m3 | 262144 | **80.0 / 157.6** | 1768 @10K / 1295 @90K | — | 2026-09-23 | 🧪 Experimental. verify-full PASS; DFlash2 accept 2.9–6.4 — the base-trained drafter converts on the fine-tune. Frozenlock control, same session: 84.0 / 154.0, 1779 / 1300. |
+| `dual/autoround-int4/dflash2.yml` (`vllm/thinkingcap38-27b-dual-ultrafast`, DFlash2 n=7, W4A8, fp8 KV + FA2 plugin) | @noonghunna (2× 3090 PCIe, **230 W**) | fp8_e4m3 | 262144 | **108.3 / 198.9** | 1778 @10K / 1376 @90K | — | 2026-09-24 | 🧪 Experimental. Booted through `switch.sh`; verify-full PASS; accept 5.0–6.7. Frozenlock same day: 108.8 / 191.5 and 111.1 / 196.6. |
+
+All three are one fresh boot each at the 230 W cap, so compare them only with each other and the same-day references.
+The other 26 replicas (FP8 tiers, SGLang, multi-card) are unbooted, and the 8-pack is pending.
 
 ---
 
