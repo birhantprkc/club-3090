@@ -18,13 +18,14 @@ described the 2026-05 Qwen3.6-27B investigation. That is now [archived below](#a
 
 | What | State |
 |---|---|
-| Shipped composes | 13 (Qwen3.8-27B), 11 registered slugs, all experimental |
+| Shipped composes | 24: Qwen3.8-27B 13 (11 registered) + ThinkingCap-Qwen3.8-27B 11 (replicas, all registered); all experimental |
 | Engine | stock `v0.5.20`, no patches required |
 | Tiers | `fast` (MTP n=4) · `superfast` (DFlash2) · `max`/`supermax` (fp8 weights) |
 | cuda-graph on Ampere | ✅ **works** — captures decode to bs=24 (the 2026-05 hang is gone) |
-| Concurrency | `--max-running-requests 1` shipped; the engine clamps to `K // r` regardless |
-| HiCache | ✅ **works on v0.5.20 with `--mamba-max-states-per-path 1`** (host SSM-pool overflow otherwise) — opt-in `KV_OFFLOAD_GB` on `sgl/qwen38-27b-dual-fast` only |
-| W4A8 | opt-in, vendored (#1226/#1248), off by default |
+| Concurrency | `MAX_RUNNING_REQUESTS` 2 on dual-fast and multi4/multi8, 1 on dual-max and dual-superfast; the engine also clamps to `K // r` (r=5 with MTP + extra_buffer) |
+| Mamba slots (K) | dual-fast pinned 20 (548,520-token pool = 2 × 262,144 resident; `MAX_MAMBA_CACHE_SIZE=auto` restores auto-fit), dual-max pinned 10, the rest auto-fit |
+| HiCache | ✅ **works on v0.5.20 with `--mamba-max-states-per-path 1`** (host SSM-pool overflow otherwise) — opt-in `KV_OFFLOAD_GB` (+ disk) on dual-fast and dual-max, both models; DFlash2 and multi-N not probed |
+| W4A8 | vendored (#1226/#1248); **on by default** for the autoround-int4 tiers since 2026-09-19 (`W4A8=0` reverts), off on the fp8 tiers |
 
 ---
 
