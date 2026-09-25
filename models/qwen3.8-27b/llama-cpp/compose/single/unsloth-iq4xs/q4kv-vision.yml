@@ -58,6 +58,10 @@
 # CTX_SIZE=215000, and the F16 projector kept in system RAM (`--no-mmproj-offload`
 # — no knob in this compose) filled to 197,437 tok with 869 MiB free: it fits, but
 # under verify-stress's 1 GiB margin guard. Not reproduced on the reference rig.
+# The cost is per image: a new 640×480 image (319 tok) takes 4.01 s of prompt time
+# with the projector on the CPU vs 0.59 s on the GPU (measured 2026-09-25, b10920,
+# EPYC 7543 32 vCPU; submitter: 4.78 s on 16 vCPU), and the GPU projector holds
+# ~1,180 MiB. Worth it for long text sessions with occasional images, not per-turn.
 #
 # ---------------------------------------------------------------------------
 # Qwen3.8-27B on llama.cpp — single 3090, UD-IQ4_XS weights, q4_0 KV, 262K ctx, vision.
