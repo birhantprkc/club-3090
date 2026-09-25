@@ -49,6 +49,9 @@ ANNOUNCEMENTS: list[tuple[str, list[int]]] = [
     ("vllm/qwen38-27b-*-nvfp4", [1024]),
     ("vllm/qwen38-27b-*-max", [993]),
     ("llamacpp/qwen38-27b-*", [993]),
+    # ThinkingCap-Qwen3.8-27B (bottlecapai fine-tune): every Qwen3.8 tier, both engines (#1418).
+    ("sgl/thinkingcap38-27b-*", [1418]),
+    ("vllm/thinkingcap38-27b-*", [1418]),
     # CPU expert offload / the moe-cache engine
     ("llamacpp-club3090/glm53-flash-*", [1117]),
     ("llamacpp-club3090/qwen38-flash-next-*", [1117]),

@@ -9,12 +9,19 @@ detected at boot, so you don't choose a compose for it.
 
 ## Pick a slug
 
-**Quick picks** (2026-09-23):
+**Quick picks** (2026-09-25):
 - **Qwen3.8-27B** has four vLLM tiers, all 🧪: `dual-max` (official FP8, MTP drafter), `dual-fast`
   (INT4 with int8 activations, MTP), `dual-superfast` / `dual-supermax` (DFlash2 drafter), and
   `dual-ultrafast` / `dual-ultramax` (DFlash2 on the FlashAttention fp8-KV plugin, full 262K). What each tier trades
   and measured: [#1076](https://github.com/noonghunna/club-3090/discussions/1076). The same tiers on
   SGLang: [#1245](https://github.com/noonghunna/club-3090/discussions/1245).
+- **ThinkingCap-Qwen3.8-27B** (bottlecapai's reasoning fine-tune): the same tiers on both engines,
+  `thinkingcap38-27b-*`, at base-model speed. ⚠️ Its license is PolyForm Small Business, not Apache:
+  [#1418](https://github.com/noonghunna/club-3090/discussions/1418).
+- **Two full 262K sessions at once:** `sgl/qwen38-27b-dual-fast` or `vllm/qwen38-27b-dual-fast` (and the
+  ThinkingCap twins). Which slugs serve concurrency: [#1092](https://github.com/noonghunna/club-3090/discussions/1092).
+- **Keep idle sessions warm:** opt-in KV offload to host RAM and disk (`KV_OFFLOAD_GB`) on the dual MTP
+  slugs of both engines: [#1419](https://github.com/noonghunna/club-3090/discussions/1419).
 - **Qwen3.6-27B:** `vllm/dual` (the model's default) or `vllm/qwen-27b-dual-max` (FP8 weights).
 - **Many agents at once:** `vllm/qwen-35b-a3b-dual` (✅). The MoE's total throughput holds steady up
   to 16 streams, where the dense 27B's peaks at 2 and halves by 8.
@@ -72,15 +79,15 @@ detected at boot, so you don't choose a compose for it.
 |  | `vllm/tess-dual-w4a16` ⭐ | ⚠️ caveats | 262144 | [dual/leaderboard-w4a16/fp8-mtp.yml](../models/tess-4-27b/vllm/compose/dual/leaderboard-w4a16/fp8-mtp.yml) | [#662](https://github.com/noonghunna/club-3090/discussions/662) |  |
 |  | `vllm/tess-dual-nvfp4` | 🧪 experimental | 131072 | [dual/nvfp4/fp8.yml](../models/tess-4-27b/vllm/compose/dual/nvfp4/fp8.yml) | [#662](https://github.com/noonghunna/club-3090/discussions/662) | needs sm 9.0+ (not a 3090) |
 | **ThinkingCap Qwen3.6-27B** | `vllm/thinkingcap-dual-w4a8` ⭐ | ⚠️ caveats | 262144 | [dual/w4a16/w4a8.yml](../models/thinkingcap-27b/vllm/compose/dual/w4a16/w4a8.yml) | [#749](https://github.com/noonghunna/club-3090/discussions/749) |  |
-| **ThinkingCap Qwen3.8-27B** | `sgl/thinkingcap38-27b-dual-fast` | 🧪 experimental | 262144 | [dual/autoround-int4/mtp.yml](../models/thinkingcap-qwen3.8-27b/sglang/compose/dual/autoround-int4/mtp.yml) | — |  |
-|  | `sgl/thinkingcap38-27b-dual-max` | 🧪 experimental | 163840 | [dual/fp8/mtp.yml](../models/thinkingcap-qwen3.8-27b/sglang/compose/dual/fp8/mtp.yml) | — |  |
-|  | `sgl/thinkingcap38-27b-dual-superfast` | 🧪 experimental | 262144 | [dual/autoround-int4/dflash2.yml](../models/thinkingcap-qwen3.8-27b/sglang/compose/dual/autoround-int4/dflash2.yml) | — |  |
-|  | `vllm/thinkingcap38-27b-dual-fast` | 🧪 experimental | 262144 | [dual/autoround-int4/mtp.yml](../models/thinkingcap-qwen3.8-27b/vllm/compose/dual/autoround-int4/mtp.yml) | — |  |
-|  | `vllm/thinkingcap38-27b-dual-max` | 🧪 experimental | 262144 | [dual/fp8/mtp.yml](../models/thinkingcap-qwen3.8-27b/vllm/compose/dual/fp8/mtp.yml) | — |  |
-|  | `vllm/thinkingcap38-27b-dual-superfast` | 🧪 experimental | 262144 | [dual/autoround-int4/dflash2-fp8.yml](../models/thinkingcap-qwen3.8-27b/vllm/compose/dual/autoround-int4/dflash2-fp8.yml) | — |  |
-|  | `vllm/thinkingcap38-27b-dual-supermax` | 🧪 experimental | 147456 | [dual/fp8/dflash2-fp8.yml](../models/thinkingcap-qwen3.8-27b/vllm/compose/dual/fp8/dflash2-fp8.yml) | — |  |
-|  | `vllm/thinkingcap38-27b-dual-ultrafast` | 🧪 experimental | 262144 | [dual/autoround-int4/dflash2.yml](../models/thinkingcap-qwen3.8-27b/vllm/compose/dual/autoround-int4/dflash2.yml) | — |  |
-|  | `vllm/thinkingcap38-27b-dual-ultramax` | 🧪 experimental | 262144 | [dual/fp8/dflash2.yml](../models/thinkingcap-qwen3.8-27b/vllm/compose/dual/fp8/dflash2.yml) | — |  |
+| **ThinkingCap Qwen3.8-27B** | `sgl/thinkingcap38-27b-dual-fast` | 🧪 experimental | 262144 | [dual/autoround-int4/mtp.yml](../models/thinkingcap-qwen3.8-27b/sglang/compose/dual/autoround-int4/mtp.yml) | [#1418](https://github.com/noonghunna/club-3090/discussions/1418) |  |
+|  | `sgl/thinkingcap38-27b-dual-max` | 🧪 experimental | 163840 | [dual/fp8/mtp.yml](../models/thinkingcap-qwen3.8-27b/sglang/compose/dual/fp8/mtp.yml) | [#1418](https://github.com/noonghunna/club-3090/discussions/1418) |  |
+|  | `sgl/thinkingcap38-27b-dual-superfast` | 🧪 experimental | 262144 | [dual/autoround-int4/dflash2.yml](../models/thinkingcap-qwen3.8-27b/sglang/compose/dual/autoround-int4/dflash2.yml) | [#1418](https://github.com/noonghunna/club-3090/discussions/1418) |  |
+|  | `vllm/thinkingcap38-27b-dual-fast` | 🧪 experimental | 262144 | [dual/autoround-int4/mtp.yml](../models/thinkingcap-qwen3.8-27b/vllm/compose/dual/autoround-int4/mtp.yml) | [#1418](https://github.com/noonghunna/club-3090/discussions/1418) |  |
+|  | `vllm/thinkingcap38-27b-dual-max` | 🧪 experimental | 262144 | [dual/fp8/mtp.yml](../models/thinkingcap-qwen3.8-27b/vllm/compose/dual/fp8/mtp.yml) | [#1418](https://github.com/noonghunna/club-3090/discussions/1418) |  |
+|  | `vllm/thinkingcap38-27b-dual-superfast` | 🧪 experimental | 262144 | [dual/autoround-int4/dflash2-fp8.yml](../models/thinkingcap-qwen3.8-27b/vllm/compose/dual/autoround-int4/dflash2-fp8.yml) | [#1418](https://github.com/noonghunna/club-3090/discussions/1418) |  |
+|  | `vllm/thinkingcap38-27b-dual-supermax` | 🧪 experimental | 147456 | [dual/fp8/dflash2-fp8.yml](../models/thinkingcap-qwen3.8-27b/vllm/compose/dual/fp8/dflash2-fp8.yml) | [#1418](https://github.com/noonghunna/club-3090/discussions/1418) |  |
+|  | `vllm/thinkingcap38-27b-dual-ultrafast` | 🧪 experimental | 262144 | [dual/autoround-int4/dflash2.yml](../models/thinkingcap-qwen3.8-27b/vllm/compose/dual/autoround-int4/dflash2.yml) | [#1418](https://github.com/noonghunna/club-3090/discussions/1418) |  |
+|  | `vllm/thinkingcap38-27b-dual-ultramax` | 🧪 experimental | 262144 | [dual/fp8/dflash2.yml](../models/thinkingcap-qwen3.8-27b/vllm/compose/dual/fp8/dflash2.yml) | [#1418](https://github.com/noonghunna/club-3090/discussions/1418) |  |
 
 56 slugs. ⭐ = the model's default for this topology (`bash scripts/switch.sh <model>/default`). Generated from the registry by `tools/docs/slug_tables.py`; don't edit by hand.
 <!-- END GENERATED: slug-table dual -->
